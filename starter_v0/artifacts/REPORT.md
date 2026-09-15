@@ -153,73 +153,72 @@ Mỗi thành viên cần tự review nội dung dưới đây và tự commit ph
 
 ### Phạm Hồ Quang Dũng — 2A202602860
 
-- **Vai trò/phần việc được nhận:** Người 1 — setup, baseline và điều phối experiment.
-- **Những gì tôi đã thay đổi trong repo chung:** Chạy baseline `v0` và kiểm tra metric trước các vòng cải tiến.
-- **File hoặc artifact liên quan:** `runs/v0_B_base_openai_20260914T182709526456.json`, `artifacts/version_log.csv`.
+- **Vai trò/phần việc được nhận:** Người 1 — Baseline & Experiment: kiểm tra môi trường, compile/smoke/preflight, chạy baseline `v0`, phân loại failure và điều phối run `v1`–`v3`.
+- **Những gì tôi đã thay đổi trong repo chung:** Thiết lập evidence baseline, chạy base eval làm mốc so sánh, theo dõi metric và kiểm tra điều kiện `provider_error_cases=0` trước khi dùng run làm evidence.
+- **File hoặc artifact liên quan:** `runs/v0_B_base_openai_20260914T182709526456.json`, `artifacts/version_log.csv`, `run-analysis.csv`.
 - **Commit hash hoặc pull request:** `f2c7db4` — `Hoan thanh buoc 1`.
-- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Dùng v0 làm mốc để so sánh khách quan mọi version sau.
-- **Khó khăn tôi gặp và cách tôi xử lý:** Provider error làm metric không hợp lệ; tôi chạy preflight trước full eval.
-- **Điều tôi học được từ phần việc này:** Evidence chỉ hợp lệ khi đủ cases và provider errors bằng 0.
-- **Nếu làm lại, tôi sẽ cải thiện điều gì:** Tự động hóa bảng tổng hợp metric và failure sớm hơn.
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Dùng baseline v0 làm mốc cố định trước khi tối ưu để mọi thay đổi v1–v3 có thể so sánh bằng metric thay vì cảm giác.
+- **Khó khăn tôi gặp và cách tôi xử lý:** Provider/network có thể gây error và làm metric không hợp lệ; tôi dùng compile, smoke test và preflight trước full eval, chỉ xác nhận metric khi measured cases đủ và provider errors bằng 0.
+- **Điều tôi học được từ phần việc này:** Một run có accuracy cao nhưng provider error hoặc tool result chưa review vẫn chưa phải evidence đáng tin cậy.
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:** Tôi sẽ chuẩn hóa script tổng hợp metric và failure ngay từ đầu để giảm thời gian đối chiếu run JSON thủ công.
 
 ### Nguyễn Hải Đăng — 2A202602963
 
-- **Vai trò/phần việc được nhận:** Người 2 — cải tiến system prompt.
-- **Những gì tôi đã thay đổi trong repo chung:** Bổ sung rule routing, missing identifier, multi-turn và confirmation.
-- **File hoặc artifact liên quan:** `artifacts/system_prompt.md`, `artifacts/version_log.csv`, base runs v1–v3.
-- **Commit hash hoặc pull request:** `900dfac`, `3bd5e93`.
-- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Đặt rule hội thoại/safety toàn cục trong system prompt để model áp dụng nhất quán.
-- **Khó khăn tôi gặp và cách tôi xử lý:** Rule hẹp gây regression; tôi kiểm tra lại base suite theo từng hypothesis.
-- **Điều tôi học được từ phần việc này:** Prompt không thay thế được runtime validation của tool.
-- **Nếu làm lại, tôi sẽ cải thiện điều gì:** Thêm regression riêng cho stale confirmation.
+- **Vai trò/phần việc được nhận:** Người 2 — System Prompt: phân tích routing, missing identifier, multi-turn, correction/cancellation và confirmation; cải tiến prompt theo hypothesis.
+- **Những gì tôi đã thay đổi trong repo chung:** Cập nhật `system_prompt.md` để bổ sung routing rule, ask-before-guess cho identifier, latest-intent rule, cancellation handling, confirmation boundary và trust hierarchy; thực hiện regression review cho các case đã PASS.
+- **File hoặc artifact liên quan:** `artifacts/system_prompt.md`, `artifacts/AGENT.md`, `artifacts/version_log.csv`, các run base v1–v3.
+- **Commit hash hoặc pull request:** `900dfac` — `feat(person2): v1 system prompt refinement — 70% → 100% case accuracy`; `3bd5e93` — version-log evidence.
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Đặt quy tắc hội thoại và safety có tính toàn cục trong system prompt, thay vì hard-code case ID hoặc dồn schema tool vào prompt.
+- **Khó khăn tôi gặp và cách tôi xử lý:** Rule quá hẹp có thể làm regression case đã PASS; tôi đối chiếu trace/failure theo hypothesis và chạy lại base suite sau mỗi thay đổi lớn.
+- **Điều tôi học được từ phần việc này:** Prompt cải thiện hành vi model nhưng không thể thay thế runtime authorization và input validation của tool.
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:** Tôi sẽ lập bảng hypothesis–expected trace trước khi sửa prompt và thêm regression riêng cho stale confirmation.
 
 ### Ngô Gia Quốc — 2A202602757
 
-- **Vai trò/phần việc được nhận:** Người 3 — audit tool declarations và schema.
-- **Những gì tôi đã thay đổi trong repo chung:** Làm rõ capability, enum, required arguments và external/action boundary.
-- **File hoặc artifact liên quan:** `artifacts/tools.yaml`, `agent.md`, base runs v1/v2.
+- **Vai trò/phần việc được nhận:** Người 3 — Tool Declarations: audit tool name, description, schema và argument convention; đối chiếu implementation/`TOOL.md`.
+- **Những gì tôi đã thay đổi trong repo chung:** Chuẩn hóa mô tả capability, enum semantics, required arguments và cảnh báo action/external boundary trong `tools.yaml`; giữ đồng bộ giữa declaration, registry, implementation và fixed eval.
+- **File hoặc artifact liên quan:** `artifacts/tools.yaml`, `agent.md`, các run base v1/v2 và tool smoke checks.
 - **Commit hash hoặc pull request:** `e698fad` — `Update mục 3 Tool declarations`.
-- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Giữ nguyên tên tool/enum để không lệch registry và fixed eval.
-- **Khó khăn tôi gặp và cách tôi xử lý:** Implementation đúng vẫn có thể route sai; tôi cải thiện description/schema model-facing.
-- **Điều tôi học được từ phần việc này:** Tool schema là một phần của prompt cho model.
-- **Nếu làm lại, tôi sẽ cải thiện điều gì:** Thêm mapping capability-to-tool và schema smoke test sớm hơn.
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Giữ nguyên tên tool và enum đã có, chỉ cải thiện declaration theo failure trace để không làm lệch registry hoặc fixed eval.
+- **Khó khăn tôi gặp và cách tôi xử lý:** Implementation đúng không bảo đảm model chọn đúng tool; tôi dùng tool description và schema như một phần của prompt để làm rõ capability boundary.
+- **Điều tôi học được từ phần việc này:** JSON schema, description và required field ảnh hưởng trực tiếp đến routing và argument quality của model.
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:** Tôi sẽ duy trì capability-to-tool mapping và deterministic schema smoke test ngay từ vòng đầu.
 
 ### Nguyễn Đình Khang — 2A202602584
 
-- **Vai trò/phần việc được nhận:** Người 4 — team eval và security review.
-- **Những gì tôi đã thay đổi trong repo chung:** Viết 10 case group và chạy group, extension, adversarial suite.
-- **File hoặc artifact liên quan:** `data/eval_group.json`, `runs/`, B3/B4a/B6 trong `artifacts/REPORT.md`.
-- **Commit hash hoặc pull request:** `2ef3621`, `fe883c6`.
-- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Mỗi case chỉ cô lập một quyết định để dễ xác định lỗi.
-- **Khó khăn tôi gặp và cách tôi xử lý:** OpenRouter thiếu key; tôi chuyển sang OpenAI và preflight trước khi chạy lại.
-- **Điều tôi học được từ phần việc này:** PASS tự động không thay thế kiểm tra tool result và filesystem.
-- **Nếu làm lại, tôi sẽ cải thiện điều gì:** Thêm regression cho confirmation gắn với payload mới nhất.
+- **Vai trò/phần việc được nhận:** Người 4 — Evaluation & Security: xây dựng team eval, chạy extension/adversarial suite và rà soát injection, confirmation boundary, data leak/external boundary.
+- **Những gì tôi đã thay đổi trong repo chung:** Viết 10 case original trong team eval (5 single-turn, 5 multi-turn), bao phủ ambiguous intent, corrected identifier, cancellation, policy + confirmed ticket và external-data boundary; chạy các suite `group`, `extension` và `adversarial`, sau đó phân tích tool calls/tool results.
+- **File hoặc artifact liên quan:** `data/eval_group.json`; final group/extension/adversarial runs trong `runs/`; mục B3, B4a và B6 của `artifacts/REPORT.md`.
+- **Commit hash hoặc pull request:** `2ef3621` — `evaluation and adversarial saftety`; `fe883c6` — `khangnd report`.
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Thiết kế mỗi case để cô lập một quyết định của agent và chỉ kiểm tra argument subset cần thiết. Cách này giúp phân biệt rõ lỗi routing, argument, cancellation và confirmation thay vì để một prompt dài tạo nhiều nguyên nhân thất bại.
+- **Khó khăn tôi gặp và cách tôi xử lý:** Lần chạy đầu dùng `openrouter` bị provider error vì môi trường chỉ có `OPENAI_API_KEY`. Tôi chạy preflight với `openai`, sau đó chạy lại toàn bộ suite để các run có `provider_error_cases=0`; đồng thời kiểm tra `tool_results` và filesystem thay vì chỉ dựa vào PASS/FAIL.
+- **Điều tôi học được từ phần việc này:** Automatic evaluator chủ yếu đo tool call/args, nên điểm PASS không chứng minh agent an toàn. Guardrail trong implementation đã chặn credential và internal identifier, nhưng prompt vẫn cần confirmation provenance rõ ràng.
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:** Tôi sẽ thêm case regression cho confirmation gắn với payload mới nhất, và phối hợp sớm với owner của `system_prompt.md`/`tools.yaml` để sửa boundary trước khi chạy full adversarial suite.
 
 ### Trần Long Khánh — 2A202602538
 
-- **Vai trò/phần việc được nhận:** Người 5 — UI, report và demo.
-- **Những gì tôi đã thay đổi trong repo chung:** Hoàn thiện UI, transcript/rehearsal evidence và tích hợp report.
-- **File hoặc artifact liên quan:** `ui.py`, `ui/`, `UI.md`, `evidence/transcripts/`, `artifacts/REPORT.md`.
+- **Vai trò/phần việc được nhận:** Người 5 — UI, Report & Demo: xây UI tái sử dụng `run_model_tool_loop`, hiển thị trace đầy đủ, hợp nhất report và chuẩn bị demo/fallback.
+- **Những gì tôi đã thay đổi trong repo chung:** Hoàn thiện UI backend/frontend, hiển thị user request, final response, tool calls, arguments, result/error và artifact version; thêm transcript/rehearsal evidence; tích hợp report và final regression artifacts.
+- **File hoặc artifact liên quan:** `ui.py`, `ui/`, `UI.md`, `scripts/rehearse_ui.py`, `evidence/transcripts/`, `artifacts/REPORT.md` và final v3 runs.
 - **Commit hash hoặc pull request:** `5c44fc4` — `Complete v3 evaluation artifacts and helpdesk UI`.
-- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Dùng chung agent loop cho UI, CLI và eval để trace nhất quán.
-- **Khó khăn tôi gặp và cách tôi xử lý:** UI phải dễ demo và audit; tôi ưu tiên hiển thị tool trace rõ ràng.
-- **Điều tôi học được từ phần việc này:** UI trace là evidence cần thiết cho safety review.
-- **Nếu làm lại, tôi sẽ cải thiện điều gì:** Thêm filter transcript và rehearsal checklist tự động.
+- **Một quyết định kỹ thuật tôi đã đưa ra và lý do:** Tái sử dụng cùng agent loop cho UI, CLI và eval để tool behavior/evidence không bị khác nhau giữa giao diện demo và evaluator.
+- **Khó khăn tôi gặp và cách tôi xử lý:** UI cần vừa dễ demo vừa audit được; tôi ưu tiên trace rõ ràng và transcript fallback thay vì chỉ tối ưu giao diện.
+- **Điều tôi học được từ phần việc này:** UI là một phần của evidence: nếu không nhìn được tool calls, args và result/error thì không thể kiểm tra safety boundary đáng tin cậy.
+- **Nếu làm lại, tôi sẽ cải thiện điều gì:** Tôi sẽ bổ sung filter/search cho transcript, trạng thái run rõ hơn và rehearsal checklist tự động trước demo.
 
 ## C3. Final checkout
 
-- [x] `TEAMMATES.md` có đủ họ tên, MSSV, GitHub username và vai trò.
-- [x] `system_prompt.md`, `tools.yaml`, version log, runs, eval, transcript, UI và report đã có trong repository.
-- [x] Có base, team, extension và adversarial run hợp lệ với provider errors bằng 0.
-- [ ] Rerun team và extension trên artifact cuối `v3+p6d62581a7d83+te14c0741d3cc` nếu muốn evidence cùng artifact cuối.
-- [x] Team eval đúng 5 single-turn + 5 multi-turn.
-- [x] Adversarial suite đã review thủ công tối thiểu 3 case.
-- [ ] Có đủ UI transcript cho normal, missing-info, multi-turn và action boundary.
-- [ ] Mỗi thành viên đã tự review và commit self-reflection bằng Git identity tương ứng.
-- [X] Mỗi thành viên xác nhận có commit của mình trong branch nộp bài.
-- [x] Không commit `.env`, API key, token, dữ liệu thật hoặc generated ticket.
-- [X] Tất cả thành viên nộp cùng URL trên VLearn.
+- [X] `TEAMMATES.md` có đủ họ tên, MSSV, GitHub username và vai trò.
+- [X] Mỗi thành viên có ít nhất một commit trong lịch sử branch nộp bài.
+- [X] Phần reflection chung của nhóm đã hoàn thành và có evidence.
+- [X] Mỗi thành viên đã tự viết và commit self-reflection của mình.
+- [X] `system_prompt.md`, `tools.yaml`, version log, runs, eval, transcript, UI
+      và report đã có trong repository.
+- [X] Không có `.env`, API key, token, dữ liệu thật, cache hoặc generated ticket.
+- [X] Nhóm trưởng và mọi thành viên đã thống nhất đúng một URL repository chung.
+- [X] Nhóm trưởng và mọi thành viên sẽ nộp cùng URL đó trên VLearn.
 
 **URL repository chung dùng để nộp:**
 
 > URL: <https://github.com/khanhtrankuri/K4A-Day04-SV>
+
